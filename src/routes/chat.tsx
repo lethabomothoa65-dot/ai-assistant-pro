@@ -147,7 +147,7 @@ function ChatPage() {
                   .join("");
                 return (
                   <Message key={m.id} from={m.role === "user" ? "user" : "assistant"}>
-                    <MessageContent variant={m.role === "user" ? "contained" : "flat"}>
+                    <MessageContent>
                       {m.role === "assistant" ? (
                         <MessageResponse>{text}</MessageResponse>
                       ) : (
@@ -160,7 +160,7 @@ function ChatPage() {
             )}
             {status === "submitted" && (
               <Message from="assistant">
-                <MessageContent variant="flat">
+                <MessageContent>
                   <Shimmer>Thinking…</Shimmer>
                 </MessageContent>
               </Message>
