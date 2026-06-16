@@ -125,8 +125,22 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full bg-background">
+          <AppSidebar />
+          <SidebarInset className="flex min-w-0 flex-1 flex-col">
+            <header className="sticky top-0 z-10 flex h-12 items-center gap-2 border-b bg-background/80 px-3 backdrop-blur">
+              <SidebarTrigger />
+              <div className="text-sm font-medium text-muted-foreground">Workplace AI</div>
+            </header>
+            <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+              <Outlet />
+            </main>
+          </SidebarInset>
+        </div>
+        <Toaster richColors position="top-right" />
+      </SidebarProvider>
     </QueryClientProvider>
   );
 }
+
