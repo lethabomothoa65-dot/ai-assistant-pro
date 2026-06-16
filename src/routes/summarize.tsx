@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { summarizeMeeting } from "@/lib/ai.functions";
+import { VoiceRecorder } from "@/components/voice-recorder";
+import { summarizeMeeting, transcribeAudio } from "@/lib/ai.functions";
 import { getDraft, incrementCounter, setDraft } from "@/lib/storage";
 
 export const Route = createFileRoute("/summarize")({
@@ -29,9 +30,16 @@ export const Route = createFileRoute("/summarize")({
 
 function SummarizePage() {
   const run = useServerFn(summarizeMeeting);
+  const transcribe = useServerFn(transcribeAudio);
   const [notes, setNotes] = useState("");
   const [output, setOutput] = useState(() => getDraft("meeting"));
   const [loading, setLoading] = useState(false);
+
+  async function handleTranscript(args: { audioBase64: string; format: "webm" | "mp4" }) {
+    const { text } = await transcribe({ data: args });
+    setNotes((prev) => (prev.trim() ? `${prev}\n\n${text}` : text));
+    return text;
+  }
 
   async function generate() {
     if (notes.trim().length < 20) {
@@ -66,12 +74,13 @@ function SummarizePage() {
               <Label htmlFor="notes">Meeting notes</Label>
               <Textarea
                 id="notes"
-                placeholder="Paste meeting notes here…"
-                rows={18}
+                placeholder="Paste meeting notes here, or record audio below…"
+                rows={16}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
               />
             </div>
+            <VoiceRecorder onTranscript={() => {}} transcribe={handleTranscript} disabled={loading} />
             <Button onClick={generate} disabled={loading} className="w-full">
               {loading ? <Loader2 className="animate-spin" /> : <Sparkles />}
               {loading ? "Summarizing…" : "Summarize meeting"}
