@@ -52,7 +52,7 @@ function ChatPage() {
   const initialMessages = useMemo(() => loadChatMessages(), []);
   const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat" }), []);
   const [input, setInput] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const formRef = useRef<HTMLDivElement | null>(null);
   const countedRef = useRef(initialMessages.length > 0);
 
   const { messages, sendMessage, status, setMessages, error } = useChat({
