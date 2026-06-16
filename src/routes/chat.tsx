@@ -69,15 +69,20 @@ function ChatPage() {
     if (error) toast.error(error.message || "Chat error");
   }, [error]);
 
+  function focusInput() {
+    requestAnimationFrame(() => {
+      const el = formRef.current?.querySelector("textarea") as HTMLTextAreaElement | null;
+      el?.focus();
+    });
+  }
+
   useEffect(() => {
-    textareaRef.current?.focus();
+    focusInput();
   }, []);
 
   const loading = status === "submitted" || status === "streaming";
 
-  function focusInput() {
-    requestAnimationFrame(() => textareaRef.current?.focus());
-  }
+
 
   function handleSubmit(message: PromptInputMessage) {
     const text = (message.text ?? input).trim();
