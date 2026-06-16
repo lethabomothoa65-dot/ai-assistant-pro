@@ -86,3 +86,43 @@ export const researchTopic = createServerFn({ method: "POST" })
     const prompt = `Topic: ${data.topic}${data.context ? `\n\nReference material:\n${data.context}` : ""}`;
     return run(system, prompt);
   });
+
+export const transcribeAudio = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      audioBase64: z.string().min(1).max(20_000_000),
+      format: z.enum(["webm", "mp4", "m4a", "wav", "mp3", "ogg"]),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const key = process.env.LOVABLE_API_KEY;
+    if (!key) throw new Error("Missing LOVABLE_API_KEY");
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Lovable-API-Key": key },
+      body: JSON.stringify({
+        model: DEFAULT_MODEL,
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Transcribe this meeting audio verbatim. Output only the transcript text with speaker turns on new lines when obvious. No commentary.",
+              },
+              { type: "input_audio", input_audio: { data: data.audioBase64, format: data.format } },
+            ],
+          },
+        ],
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      if (res.status === 429) throw new Error("Rate limit reached. Please wait a moment and try again.");
+      if (res.status === 402) throw new Error("AI credits exhausted. Please add credits in your workspace billing.");
+      throw new Error(`Transcription failed (${res.status}): ${body.slice(0, 200)}`);
+    }
+    const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+    const text = json.choices?.[0]?.message?.content ?? "";
+    return { text };
+  });
