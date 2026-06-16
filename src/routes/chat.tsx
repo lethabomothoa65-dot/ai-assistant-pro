@@ -174,10 +174,9 @@ function ChatPage() {
           <ConversationScrollButton />
         </Conversation>
 
-        <div className="border-t bg-background p-3">
+        <div ref={formRef} className="border-t bg-background p-3">
           <PromptInput onSubmit={handleSubmit}>
             <PromptInputTextarea
-              ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Message the workplace assistant…"
@@ -187,6 +186,7 @@ function ChatPage() {
             </PromptInputFooter>
           </PromptInput>
         </div>
+
       </Card>
     </div>
   );
